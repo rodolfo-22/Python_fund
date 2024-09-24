@@ -28,4 +28,7 @@ print(my_dicc.keys())
 print(my_dicc.values())
 print(my_dicc.items())
 
+my_new_dicc = dict.fromkeys(my_dicc)
+print(my_new_dicc)
 
+my_new_dicc = dict.fromkeys(my_dicc, "Comentario") #asigna un valor a todas las claves
