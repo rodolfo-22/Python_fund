@@ -36,4 +36,27 @@ json_file.close()
 #como modificamos
 json_dict = json.load(open("01_10_2024/my_json2.json"))
 print(json_dict)
-#min 5.14
+print(type(json_dict))
+print(json_dict["name"])    
+
+#scv file
+import csv
+csv_file = open("01_10_2024/my_csv.csv", "w+")
+#como se escribe
+csv_writer = csv.writer(csv_file)
+csv_writer.writerow(["name", "age", "city"])
+csv_writer.writerow(["John", 30, "New York"])
+csv_writer.writerow(["Carlos", " ", "Acapulco"])
+
+csv_file.close()
+
+
+#.xlsx
+#xml, es 
+import xml 
+#como se crea un fichero  xml
+xml_file = open("01_10_2024/my_xml.xml", "w+")
+xml_file.write("<name>John</name>")
+xml_file.write("<age>30</age>")
+xml_file.write("<city>New York</city>")
+xml_file.close()
