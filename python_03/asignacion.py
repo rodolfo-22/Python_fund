@@ -48,4 +48,18 @@ print(rendimiento.min())
 print(rendimiento.idxmin())
 #rendimiento mayor al 15%
 print("Rendimiento mayor al 15%")
-print(rendimiento[rendimiento > 15])
+print(rendimiento[rendimiento > 15]) 
+print("clasificacion por rendimento")
+print("rend alto :")
+print(rendimiento[rendimiento > 15].index)
+print("rend medio :")
+print(rendimiento[(rendimiento > 5) & (rendimiento < 15)].index)
+print("rend bajo :")
+print(rendimiento[rendimiento < 5].index)
+
+# Definir los límites y las etiquetas para clasificar los valores
+bins = [0, 300, 600, float('inf')]  # Rango: 0-300, 300-600, 600+
+labels = ['Bajo', 'Medio', 'Alto']
+# Clasificar la serie según los límites y etiquetas
+clasificaciones = pd.cut(precios, bins=bins, labels=labels)
+print(clasificaciones)
