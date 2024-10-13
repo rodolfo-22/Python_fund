@@ -64,3 +64,5 @@ labels = ['Bajo', 'Medio', 'Alto']
 clasificaciones = pd.cut(precios, bins=bins, labels=labels)
 print(clasificaciones)
 #examples
+
+#https://colab.research.google.com/drive/1YxPYMAg6o-UiV22HNZa7_1pjp5YHXQi5#scrollTo=JFr8-OyquZQz
