@@ -63,3 +63,4 @@ labels = ['Bajo', 'Medio', 'Alto']
 # Clasificar la serie según los límites y etiquetas
 clasificaciones = pd.cut(precios, bins=bins, labels=labels)
 print(clasificaciones)
+#examples
