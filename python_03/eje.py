@@ -24,3 +24,28 @@ print(s["Teléfono"])
 #Genera un resumen estadístico de la Serie de precios. 
 # ¿Cuál es el precio promedio?
 print(s.describe())
+
+#Aplica una función a la Serie de precios para aumentar cada precio en un 5%.
+s = s.apply(lambda x: x * 1.05)
+print(s)
+#
+print("Mostar los productos con un precio mayor a 500.")
+print(s[s>500])
+#Ordena la Serie de precios en orden ascendente.
+print("mostrar en orden ascendente")
+print(s.sort_values())
+print("mostrar en orden descendente")
+print(s.sort_values(ascending=False))
+
+#DataFrame
+#Crea un DataFrame a partir de una lista de listas que incluya información sobre
+# cada producto: el nombre, el precio y el stock. Agreguen los valores de su 
+# preferencia
+print("DataFrame")
+df = pd.DataFrame([["Laptop", 1200, 10], ["Teléfono", 800, 25], ["Tablet", 300, 15], ["Monitor", 400, 20]], columns = ["Producto", "Precio", "Stock"])
+print(df)
+#a parir de una lista de diccionarios
+print("DataFrame")
+df = pd.DataFrame([{"Producto": "Laptop", "Precio": 1200, "Stock": 10}, {"Producto": "Teléfono", "Precio": 800, "Stock": 25}, {"Producto": "Tablet", "Precio": 300, "Stock": 15}, {"Producto": "Monitor", "Precio": 400, "Stock": 20}])
+print(df)
+
