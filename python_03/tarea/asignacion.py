@@ -21,7 +21,10 @@ print("El minimo es",precios.min(),"y corresponde a ", precios.idxmin())
 
 #Aplica una función que incremente el precio de cada acción en un 2% y 
 # guarda el resultado en una nueva Serie llamada precios_actualizados.
-
-
+precios_actualizados = precios.apply(lambda x: x*1.02)
+print("Precios actualizados: ", precios_actualizados)
+#Redondea los valores de precios_actualizados a dos decimales.
+precios_actualizados = precios_actualizados.round(2)
+print("Precios actualizados redondeados: ", precios_actualizados)
 
 
