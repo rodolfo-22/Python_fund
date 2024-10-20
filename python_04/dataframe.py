@@ -1,6 +1,6 @@
 #dataframe
 import pandas as pd
-df = pd.read_csv('data.csv')
+df = pd.read_csv(r'C:\Users\garci\Documents\Python_2024\python_04\data.csv')
 print(df)
 
 #Imprime los primeros cinco registros del DataFrame.
