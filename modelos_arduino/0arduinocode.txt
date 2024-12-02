@@ -1,0 +1,219 @@
+#include <Keypad.h>
+
+
+// Configuración del teclado
+const byte filas = 4;
+const byte columnas = 4;
+char teclas[4][4] = {
+  {'1', '2', '3', 'A'},
+  {'4', '5', '6', 'B'},
+  {'7', '8', '9', 'C'},
+  {'*', '0', '#', 'D'}
+};
+
+
+// Pines para el teclado
+byte pinesFilas[] = {22, 24, 26, 28};
+byte pinesColumnas[] = {30, 32, 34, 36};
+Keypad teclado = Keypad(makeKeymap(teclas), pinesFilas, pinesColumnas, filas, columnas);
+
+
+// Pines para los motores
+const int ln1 = 2, ln2 = 3, enA = 4; // Motor X
+const int ln3 = 5, ln4 = 6, enB = 7; // Motor Y
+const int ln5 = 8, ln6 = 9, enC = 10; // Motor Z
+
+
+// Pines para los sensores ultrasónicos
+const int trigX = 31, echoX = 33;
+const int trigY = 35, echoY = 37;
+const int trigZ = 39, echoZ = 41;
+
+
+// Configuración de motor y tiempo
+int velocidad = 80;
+long tiempoPorCm = 800;
+const unsigned long intervaloLectura = 100; // Intervalo de lectura en ms
+
+
+void setup() {
+  // Configuración de pines de motores
+  pinMode(ln1, OUTPUT); pinMode(ln2, OUTPUT); pinMode(enA, OUTPUT);
+  pinMode(ln3, OUTPUT); pinMode(ln4, OUTPUT); pinMode(enB, OUTPUT);
+  pinMode(ln5, OUTPUT); pinMode(ln6, OUTPUT); pinMode(enC, OUTPUT);
+
+
+  // Configuración de sensores ultrasónicos
+  pinMode(trigX, OUTPUT); pinMode(echoX, INPUT);
+  pinMode(trigY, OUTPUT); pinMode(echoY, INPUT);
+  pinMode(trigZ, OUTPUT); pinMode(echoZ, INPUT);
+
+
+  // Inicialización del Monitor Serial
+  Serial.begin(9600);
+  Serial.println("Sistema listo.");  // Mensaje inicial para la interacción
+}
+
+
+void loop() {
+  char motor = elegirMotor();
+  char direccion = elegirDireccion();
+  int distancia = leerDistancia(motor);
+
+
+  if (motor == 'X') {
+    moverMotorConLectura(ln1, ln2, enA, direccion, distancia, trigX, echoX, 'X');
+  } else if (motor == 'Y') {
+    moverMotorConLectura(ln3, ln4, enB, direccion, distancia, trigY, echoY, 'Y');
+  } else if (motor == 'Z') {
+    moverMotorConLectura(ln5, ln6, enC, direccion, distancia, trigZ, echoZ, 'Z');
+  }
+
+
+  if (!deseaContinuar()) {
+    Serial.println("Finalizando el programa.");
+    while (true);
+  }
+}
+
+
+// Función para mover motor con lecturas continuas
+void moverMotorConLectura(int pin1, int pin2, int pinVelocidad, char direccion, int distancia, int trigPin, int echoPin, char motor) {
+  long tiempoTotal = distancia * tiempoPorCm;
+  unsigned long inicio = millis();
+  unsigned long ultimaLectura = millis();
+
+
+  // Configurar dirección del motor
+  if (direccion == 'U') {
+    digitalWrite(pin1, HIGH);
+    digitalWrite(pin2, LOW);
+  } else if (direccion == 'D') {
+    digitalWrite(pin1, LOW);
+    digitalWrite(pin2, HIGH);
+  }
+
+
+  analogWrite(pinVelocidad, velocidad);
+
+
+  // Mientras el motor esté en movimiento
+  while (millis() - inicio < tiempoTotal) {
+    if (millis() - ultimaLectura >= intervaloLectura) {
+      ultimaLectura = millis();
+      long distanciaLeida = leerDistanciaSensor(trigPin, echoPin);
+
+
+      // Enviar solo datos relevantes (tiempo, motor y distancia)
+      Serial.print(millis() - inicio); // Tiempo transcurrido
+      Serial.print(",");
+      Serial.print(motor); // Motor
+      Serial.print(",");
+      Serial.println(distanciaLeida); // Distancia leída
+    }
+  }
+
+
+  detenerMotor(pin1, pin2, pinVelocidad);
+}
+
+
+// Función para leer la distancia de un sensor ultrasónico
+long leerDistanciaSensor(int trigPin, int echoPin) {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+
+  long duracion = pulseIn(echoPin, HIGH);
+  long distancia = duracion * 0.034 / 2; // Conversión a cm
+  return distancia;
+}
+
+
+// Función para elegir el motor
+char elegirMotor() {
+  Serial.println("Selecciona el motor: A para eje X, B para eje Y, C para eje Z");
+  char tecla;
+  while (true) {
+    tecla = teclado.getKey();
+    if (tecla == 'A') return 'X';
+    if (tecla == 'B') return 'Y';
+    if (tecla == 'C') return 'Z';
+  }
+}
+
+
+// Función para elegir la dirección
+char elegirDireccion() {
+  Serial.println("Selecciona la dirección: A para retroceder, B para avanzar");
+  char tecla;
+  while (true) {
+    tecla = teclado.getKey();
+    if (tecla == 'A') return 'U'; // Dirección positiva
+    if (tecla == 'B') return 'D'; // Dirección negativa
+  }
+}
+
+
+// Función para leer una distancia desde el teclado y validarla
+int leerDistancia(char motor) {
+  int distancia = 0;
+  char tecla;
+  Serial.println("Ingresa la distancia en cm y presiona #:");
+
+
+  // Definir límites para cada eje
+  int limiteX = 9;
+  int limiteY = 4;
+  int limiteZ = 7;
+
+
+  while (true) {
+    tecla = teclado.getKey();
+    if (tecla) {
+      if (tecla == '#') {
+        if ((motor == 'X' && distancia > limiteX) ||
+            (motor == 'Y' && distancia > limiteY) ||
+            (motor == 'Z' && distancia > limiteZ)) {
+          Serial.println("Error: La distancia ingresada supera el límite permitido para este eje.");
+          distancia = 0;
+        } else {
+          break;
+        }
+      } else if (tecla >= '0' && tecla <= '9') {
+        distancia = distancia * 10 + (tecla - '0');
+        Serial.print("Distancia que se desplazara cm: ");
+        Serial.println(distancia);
+      } else {
+        Serial.println("Entrada inválida. Usa solo números o # para confirmar.");
+      }
+    }
+  }
+  return distancia;
+}
+
+
+// Función para detener el motor
+void detenerMotor(int pin1, int pin2, int pinVelocidad) {
+  analogWrite(pinVelocidad, 0);
+  digitalWrite(pin1, LOW);
+  digitalWrite(pin2, LOW);
+  Serial.println("Motor detenido.");
+}
+
+
+// Función para preguntar si el usuario desea continuar
+bool deseaContinuar() {
+  Serial.println("¿Deseas continuar? Presiona A para sí, B para no:");
+  char tecla;
+  while (true) {
+    tecla = teclado.getKey();
+    if (tecla == 'A') return true;
+    if (tecla == 'B') return false;
+  }
+}
+
+
